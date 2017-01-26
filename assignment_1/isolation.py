@@ -161,7 +161,23 @@ class Board:
 
     def get_opponent_moves(self):                  
         #chnaged so that you get access to even the inactive players queens.
-        return {self.__inactive_players_queen1__:self.__get_moves__(self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen1__)]) , self.__inactive_players_queen2__:self.__get_moves__(self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen2__)])}
+        #return {self.__inactive_players_queen1__:self.__get_moves__(self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen1__)]) , self.__inactive_players_queen2__:self.__get_moves__(self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen2__)])}
+        
+        #changed to include edge cases!
+        move_by_q1 = self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen1__)]
+        move_by_q2 = self.__last_queen_move__[self.get_queen_name(self.__inactive_players_queen2__)]
+        
+        if  move_by_q1== Board.NOT_MOVED and move_by_q2== Board.NOT_MOVED :
+            return {self.__inactive_players_queen1__:self.__get_moves__(move_by_q1) , self.__inactive_players_queen2__:self.__get_moves__(move_by_q2)}
+        
+        elif  move_by_q1== Board.NOT_MOVED and move_by_q2!= Board.NOT_MOVED :
+            return {self.__inactive_players_queen1__:self.__get_moves__(move_by_q1) , self.__inactive_players_queen2__:[]}
+        
+        elif  move_by_q1!= Board.NOT_MOVED and move_by_q2== Board.NOT_MOVED :
+            return {self.__inactive_players_queen1__:[] , self.__inactive_players_queen2__:self.__get_moves__(move_by_q2)}
+        
+        else :
+            return {self.__inactive_players_queen1__:self.__get_moves__(move_by_q1) , self.__inactive_players_queen2__:self.__get_moves__(move_by_q2)}
     
 
     def get_legal_moves(self):
@@ -278,6 +294,8 @@ class Board:
         mi=1
         
         curr_time_millis = lambda : 1000 * resource.getrusage(resource.RUSAGE_SELF).ru_utime
+        
+       
 
 
         while True:
