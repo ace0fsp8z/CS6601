@@ -35,9 +35,9 @@ class CustomEvalFn():
         p2_num_moves = len(set(sum(game.get_opponent_moves().values(), [])))
 
         if maximizing_player_turn:
-            return p1_num_moves - 3 * p2_num_moves
+            return p1_num_moves - (3 * p2_num_moves)
         else:
-            return p2_num_moves - 3 * p1_num_moves
+            return p2_num_moves - (3 * p1_num_moves)
 
 
 class CustomPlayer():
@@ -50,22 +50,49 @@ class CustomPlayer():
     to make sure it properly uses minimax
     and alpha-beta to return a good move
     in less than 5 seconds."""
-    def __init__(self, search_depth=3, eval_fn=CustomEvalFn(), algo='minimax'):
+    def __init__(self, search_depth=3, eval_fn=CustomEvalFn(), algo='alphabeta'):
         # if you find yourself with a superior eval function, update the
         # default value of `eval_fn` to `CustomEvalFn()`
         self.eval_fn = eval_fn
         self.search_depth = search_depth
         self.algo = algo
+        self.time_limit = 2000
 
     def move(self, game, legal_moves, time_left):
         if self.algo == 'minimax':
             best_move, best_queen, utility = self.minimax(game, time_left, depth=self.search_depth, maximizing_player=True)
-        else:
+        elif self.algo == 'alphabeta':
             best_move, best_queen, utility = self.alphabeta(game, time_left, depth=self.search_depth, maximizing_player=True)
-        # change minimax to alphabeta after completing alphabeta part of assignment
-        # print 'active:', game.get_active_players_queen()
-        # print 'moves:', game.get_legal_moves()
-        # print 'move:', best_move, best_queen, utility, '\n'
+        else:
+            # iterative deepening and alpha beta pruning
+            move_dict = {}
+            # use array because minimax/alpha-beta pruning select the left most path
+            move_array = []
+            depth = 2
+            while time_left() > self.time_limit:
+                move, queen, utility = self.alphabeta(game, time_left, depth=depth, maximizing_player=True)
+                key = (move, queen)
+                if key in move_dict:
+                    move_dict[key] += 1
+                else:
+                    move_dict[key] = 1
+                    move_array.append(key)
+
+                if move_dict[key] >= 4:
+                    break
+
+                depth += 1
+
+            best_move = None
+            best_queen = None
+            select_count = 0
+            # move thru the array selecting the one with the highest count and the left most position
+            for key in move_array:
+                count = move_dict[key]
+                if select_count < count:
+                    select_count = count
+                    best_move, best_queen = key
+
         return best_move, best_queen 
 
     def utility(self, game):
@@ -97,53 +124,42 @@ class CustomPlayer():
         return best_move, best_queen, best_val
 
     def alphabeta(self, game, time_left, depth=float("inf"), alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
-        """
-                      d0
-                /            \
-              d1              d1
-           /      \        /      \
-          d2      d2      d2      d2
-         /  \    /  \    /  \    /  \
-        d3  d3  d3  d3  d3  d3  d3  d3
-        """
+        best_move = (-1, -1)
+        best_queen = -1
 
-        best_move = None
-        best_queen = None
+        move_dict = game.get_legal_moves()
+        moves = set(sum(move_dict.values(), []))
 
-        moves = [(queen, move) for queen, legal_moves in game.get_legal_moves().iteritems() for move in legal_moves]
-        # print depth, moves, maximizing_player
-
-        if depth == 1 or len(moves) == 0 or time_left() < 100:
+        if depth == 1 or len(moves) == 0 or time_left() < self.time_limit:
             return best_move, best_queen, self.utility(game)
 
         if maximizing_player:
             val = float('-inf')
-            for queen, move in moves:
-                forecasted_game = game.forecast_move(move, queen)
-                _, _, next_val = self.alphabeta(forecasted_game, time_left, depth=(depth - 1),
-                                                alpha=alpha, beta=beta, maximizing_player=(not maximizing_player))
-                val = max(val, next_val)
-                # print 'val', val
-                # alpha = max(alpha, val)
-                if alpha < val:
-                    alpha = val
-                    best_move = move
-                    best_queen = queen
-                if beta <= alpha:
-                    break
+            for queen in move_dict:
+                for move in move_dict[queen]:
+                    forecasted_game = game.forecast_move(move, queen)
+                    _, _, next_val = self.alphabeta(forecasted_game, time_left, depth=(depth - 1),
+                                                    alpha=alpha, beta=beta, maximizing_player=(not maximizing_player))
+                    val = max(val, next_val)
+                    if alpha < val:
+                        alpha = val
+                        best_move = move
+                        best_queen = queen
+                    if beta <= alpha:
+                        break
             return best_move, best_queen, val
         else:
             val = float('inf')
-            for queen, move in moves:
-                forecasted_game = game.forecast_move(move, queen)
-                _, _, next_val = self.alphabeta(forecasted_game, time_left, depth=(depth - 1),
-                                                alpha=alpha, beta=beta, maximizing_player=(not maximizing_player))
-                val = min(val, next_val)
-                # beta = min(beta, val)
-                if beta > val:
-                    beta = val
-                    best_move = move
-                    best_queen = queen
-                if beta <= alpha:
-                    break
+            for queen in move_dict:
+                for move in move_dict[queen]:
+                    forecasted_game = game.forecast_move(move, queen)
+                    _, _, next_val = self.alphabeta(forecasted_game, time_left, depth=(depth - 1),
+                                                    alpha=alpha, beta=beta, maximizing_player=(not maximizing_player))
+                    val = min(val, next_val)
+                    if beta > val:
+                        beta = val
+                        best_move = move
+                        best_queen = queen
+                    if beta <= alpha:
+                        break
             return best_move, best_queen, val

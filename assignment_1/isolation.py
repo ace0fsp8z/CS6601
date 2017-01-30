@@ -378,5 +378,5 @@ if __name__ == '__main__':
     from test_players import HumanPlayer
 
     board = Board(RandomPlayer(), HumanPlayer())
-    winner, move_history,queen_history, termination = board.play_isolation()
-    print (game_as_text(winner, move_history,queen_history, termination))
+    winner, move_history, queen_history, termination = board.play_isolation()
+    print (game_as_text(winner, move_history, queen_history, termination))
