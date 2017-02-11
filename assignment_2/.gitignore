@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+#Ipython Notebook
+.ipynb
+.ipynb_checkpoints
+
+#DS_Store
+.DS_Store
+
+# Vagrant
+.vagrant/

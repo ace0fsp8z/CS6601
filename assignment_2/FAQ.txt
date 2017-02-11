@@ -1,0 +1,27 @@
+FAQ
+
+Aggregated Feedback + Solutions
+
+1. Setting up for Assignment 2 (written by a student) - https://docs.google.com/document/d/1IJNulLl0fDzZdeJmzOghNC2emh_6QR1zm8vxKTYD0Es/pub
+
+2. If romania = pickle.load(open('romania_graph.pickle', 'rb')) does not work (especially on Windows), you can try reading it without binary mode using romania = pickle.load(open('romania_graph.pickle', 'r')).
+
+3. Use %matplotlib inline if you want to see the plots displayed within the same browser. Add it after the import statements at the top and you should be good.
+
+4. If you have networkx installed and don’t want to use virtualenv, you can try replacing sys.path.append('lib') with sys.path = ['lib'] + sys.path.
+
+5. Make sure you clean up any changes/modifications/additions you make to the networkx graph struture before you exit the search function. Depending on your changes, the auto grader might face difficulties while testing. The best alternative is to create your own data structure(s).
+
+6. If you're having problems (exploring too many nodes) with your Breadth first search implementation, one thing many students have found useful is to re-watch the Udacity videos for an optimization trick mentioned.
+
+7. You may not get full credit if your tri-directional implementation has calls to your bi-directional implementation.
+
+8. While submitting to Bonnie, many times the submission goes through even if you get an error on the terminal. You should check the web interface to make sure it’s not gone through before re-submitting. On the other hand, make sure your final submission goes through with Bonnie. Submit your code to T-Square as a backup.
+
+9. Most 'NoneType object ...' errors are because the path you return is not completely connected (a pair of successive nodes in the path are not connected). Or because the path variable itself is empty.
+
+10. Adding unit tests to your code may cause your Bonnie submission to fail. It is best to comment them out when you submit to Bonnie.
+
+11. The testing file map_test.py is intended as a diagnostic tool. Feel free to modify it, but be careful.
+
+12. Make sure you're returning [] for when the source and destination points are the same.
