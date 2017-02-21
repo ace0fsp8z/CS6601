@@ -1,3 +1,8 @@
+# Yonathan Lim
+# yhalim3
+# CS6601
+# Assignment 2
+
 # This file is your main submission that will be graded against. Only copy-paste
 # code on the relevant classes included here from the IPython notebook. Do not
 # add any classes or functions to this file that are not part of the classes
@@ -211,6 +216,7 @@ def bidirectional_ucs(graph, start, goal):
 
 
 def get_path(state, forward_node, backward_node, forward_visited, backward_visited):
+    # TODO: update to check the intersection rather than using nodes that have been explored from forward and backward
     forward_path = []
     backward_path = []
 
