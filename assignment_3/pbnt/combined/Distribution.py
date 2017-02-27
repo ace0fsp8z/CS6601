@@ -103,9 +103,9 @@ class Potential(object):
          which is currently generating strings which are then executed using eval.
         """
         if isinstance(index, (int, float, long)):
-            index = [index]
+            index = [int(index)]
         # assert(len(index) == len(axis))
-        tmp = zeros(self.nDims) - 1
+        tmp = zeros(self.nDims, dtype=int) - 1
         if len(axis) > 0:
             tmp[axis] = index
         indexStr = ""
