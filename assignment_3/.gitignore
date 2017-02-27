@@ -9,3 +9,5 @@ __pycache__/
 # IPython Notebook
 .ipynb_checkpoints
 .DS_Store
+
+references
