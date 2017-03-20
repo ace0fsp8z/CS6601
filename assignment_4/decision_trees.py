@@ -1,3 +1,8 @@
+# Yonathan Lim
+# yhalim3
+# CS6601
+# Assignment 4
+
 import numpy as np
 from collections import Counter
 import time
