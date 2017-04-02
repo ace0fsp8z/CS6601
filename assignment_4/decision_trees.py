@@ -271,6 +271,7 @@ class RandomForest():
         """Build a random forest of 
         decision trees."""
         # TODO implement the above algorithm
+        classes = np.array(classes)
         sample_size, attr_size = features.shape
         sample_indices = np.arange(sample_size)
         attr_indices = np.arange(attr_size)
