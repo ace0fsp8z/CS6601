@@ -29,8 +29,40 @@ def k_means_cluster(image_values, k=3, initial_means=None):
     returns:
     updated_image_values = numpy.ndarray[numpy.ndarray[numpy.ndarray[float]]]
     """
-    # TODO: finish this function
-    raise NotImplementedError()
+    h, w = image_values.shape[:2]
+    if initial_means is None:
+        x_indices = np.random.choice(xrange(1, h), size=k, replace=False)
+        y_indices = np.random.choice(xrange(1, w), size=k, replace=False)
+        initial_means = image_values[x_indices, y_indices]
+
+    means = initial_means
+    updated_image_values = image_values.copy()
+    while True:
+        distances = []
+        # find the distance between each pixel and the mean
+        for i, mean in enumerate(means):
+            distance = np.sum(np.square(image_values - mean), axis=2)
+            distances.append(distance.T)
+        # then merge k distance and get the label using minimum distance
+        labels = np.argmin(np.vstack([distances]).T, axis=2)
+
+        # calculate the new updated means
+        updated_means = []
+        for i in xrange(k):
+            indices = labels == i
+            mean = np.average(image_values[indices], axis=0)
+            updated_means.append(mean)
+        diff = np.linalg.norm(updated_means - means, axis=1)
+        # update the means
+        means = np.array(updated_means)
+        # check for convergence
+        if np.all(diff < 0.00001):
+            break
+
+    for i in xrange(k):
+        indices = labels == i
+        updated_image_values[indices] = means[i]
+
     return updated_image_values
 
 
@@ -83,14 +115,26 @@ class GaussianMixtureModel:
         image_matrix = (grayscale) numpy.nparray[numpy.nparray[float]]
         num_components = int
         """
+        # self.image_matrix = image_matrix
+        # self.num_components = num_components
+        # if(means is None):
+        #     self.means = [0]*num_components
+        # else:
+        #     self.means = means
+        # self.variances = [0]*num_components
+        # self.mixing_coefficients = [0]*num_components
         self.image_matrix = image_matrix
         self.num_components = num_components
-        if(means is None):
-            self.means = [0]*num_components
-        else:
-            self.means = means
-        self.variances = [0]*num_components
-        self.mixing_coefficients = [0]*num_components
+        self.means = np.array([0] * num_components) if means is None else np.array(means)
+        self.variances = np.array([0]*num_components)
+        self.mixing_coefficients = np.array([0]*num_components)
+        self.flatten_image = flatten_image_matrix(self.image_matrix)
+
+    def get_probabilities(self, values):
+        means = np.array(self.means)
+        x1 = -.5 * np.log(2 * np.pi * np.square(self.variances))
+        x2 = np.square(values - means) / (2 * np.square(self.variances))
+        return np.exp(x1 - x2) * self.mixing_coefficients
 
     def joint_prob(self, val):
         """Calculate the joint
@@ -103,9 +147,8 @@ class GaussianMixtureModel:
         returns:
         joint_prob = float
         """
-        # TODO: finish this
-        raise NotImplementedError()
-        return joint_prob
+        probabilities = self.get_probabilities(val)
+        return np.log(np.sum(probabilities))
 
     def initialize_training(self):
         """
@@ -122,8 +165,9 @@ class GaussianMixtureModel:
         train_model() in order for tests
         to execute correctly.
         """
-        # TODO: finish this
-        raise NotImplementedError()
+        self.means = np.random.choice(self.flatten_image.flatten(), self.num_components)
+        self.variances = np.ones(self.num_components).astype(np.float)
+        self.mixing_coefficients = np.ones(self.num_components) / np.float(self.num_components)
 
     def train_model(self, convergence_function=default_convergence):
         """
@@ -140,8 +184,26 @@ class GaussianMixtureModel:
         params:
         convergence_function = function that returns True if convergence is reached
         """
-        # TODO: finish this
-        raise NotImplementedError()
+        conv_ctr = 0
+        prev_likelihood = self.likelihood()
+        while True:
+            # E step
+            probabilities = self.get_probabilities(self.flatten_image)
+            gamma = probabilities / np.sum(probabilities, axis=1).reshape(probabilities.shape[0], 1)
+
+            # M step
+            N_k = np.sum(gamma, axis=0)
+            self.means = np.sum(gamma * self.flatten_image, axis=0) / N_k
+            self.variances = np.sum(gamma * np.power(self.flatten_image - self.means, 2), axis=0) / N_k
+            self.mixing_coefficients = N_k / self.flatten_image.size
+
+            # Evaluate log likelihood and check for convergence
+            new_likelihood = self.likelihood()
+            conv_ctr, converged = default_convergence(prev_likelihood, new_likelihood, conv_ctr, conv_ctr_cap=10)
+            prev_likelihood = new_likelihood
+
+            if converged:
+                break
 
     def segment(self):
         """
@@ -171,9 +233,7 @@ class GaussianMixtureModel:
         returns:
         log_likelihood = float [0,1]
         """
-        # TODO: finish this
-        raise NotImplementedError()
-        return log_likelihood
+        return self.joint_prob(self.flatten_image)
 
     def best_segment(self, iters):
         """Determine the best segmentation
